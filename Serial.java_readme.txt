@@ -1,0 +1,23 @@
+Handles Serial connection. Searches ports, connects to arduino and writes data on serial line.
+
+void searchForPorts()
+
+- Searches for ports
+- Lists them in an ArrayList
+- Port name ArrayList can be accessed through getPorts()
+
+ArrayList<String> getPorts()
+
+- If ports are found, resulting ArrayList is printed.
+- If not found, searchForPorts() is called again and attempts to list ports
+- If there still are no ports around, null is returned. 
+
+void connect(String portSelected)
+
+- connects to the serial port "portSelected"
+- note: if there are multiple ports found in getPorts(), you're doing something wrong (two arduinos?)
+- #TODO
+
+boolean isConnected()
+
+- returns true if connected, false if else.
