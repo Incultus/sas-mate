@@ -1,5 +1,15 @@
 Handles Serial connection. Searches ports, connects to arduino and writes data on serial line.
 
+void log(String s)
+
+- logs String s
+- intended to be changed and/or overridden by child class as development progresses
+
+void logData(String s)
+
+- logs String s
+- intended to be changed and/or overridden by child class as development progresses
+
 void searchForPorts()
 
 - Searches for ports
@@ -16,8 +26,36 @@ void connect(String portSelected)
 
 - connects to the serial port "portSelected"
 - note: if there are multiple ports found in getPorts(), you're doing something wrong (two arduinos?)
-- #TODO
+- prints log messages
 
 boolean isConnected()
 
 - returns true if connected, false if else.
+
+boolean initIOStream() throws IOException
+
+- attempts to open IOStream 
+- returns true if serial opens correctly
+- returns false and throws IOException if there is a problem opening stream
+
+void initListener()
+
+- initializes listener
+- sets code to be notified when there is new data coming back from Arduino
+
+void disconnect()
+
+- disconnects connections of all types (input, output and shakehand
+- throws generic Exception when fails to disconnect
+
+void serialEvent()
+
+- May be overridden by child class
+- gets called when something gets recieved in the Java code
+- calls logData(s) and passes the recieved data as "s"
+
+void writeData(int first, int second)
+
+- Writes two integers, first and second
+- format goes: first + DASH_ASCII + second + SPACE_ASCII
+

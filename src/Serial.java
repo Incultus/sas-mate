@@ -1,10 +1,17 @@
-import gnu.io.*;
+import gnu.io.CommPort;
+import gnu.io.CommPortIdentifier;
+import gnu.io.PortInUseException;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.TooManyListenersException;
 
 public class Serial implements SerialPortEventListener {
     
@@ -22,10 +29,6 @@ public class Serial implements SerialPortEventListener {
     private InputStream input = null;
     private OutputStream output = null;
 
-    //just a boolean flag that i use for enabling
-    //and disabling buttons depending on whether the program
-    //is connected to a serial port or not
-    private boolean bConnected = false;
 
     //the timeout value for connecting with the port
     final static int TIMEOUT = 2000;
@@ -39,13 +42,6 @@ public class Serial implements SerialPortEventListener {
     private ArrayList<String> portNames = new ArrayList();
     
     private boolean isConnected = false; 
-    
-	@Override
-	public void serialEvent(SerialPortEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	
 	public void searchForPorts() {
 	        ports = CommPortIdentifier.getPortIdentifiers();
@@ -89,34 +85,127 @@ public class Serial implements SerialPortEventListener {
 	            setConnected(true);
 
 	            //logging
-	            logText = selectedPort + " opened successfully.";
-	            window.txtLog.setForeground(Color.black);
-	            window.txtLog.append(logText + "\n");
+	            log(selectedPort + " opened successfully.");
 
 	            //CODE ON SETTING BAUD RATE ETC OMITTED
 	            //XBEE PAIR ASSUMED TO HAVE SAME SETTINGS ALREADY
 
-	            //enables the controls on the GUI if a successful connection is made
-	            window.keybindingController.toggleControls();
+	            }
+	        catch (PortInUseException e) {
+	            log(selectedPort + " is in use. (" + e.toString() + ")");
 	        }
-	        catch (PortInUseException e)
-	        {
-	            logText = selectedPort + " is in use. (" + e.toString() + ")";
-
-	            window.txtLog.setForeground(Color.RED);
-	            window.txtLog.append(logText + "\n");
-	        }
-	        catch (Exception e)
-	        {
-	            logText = "Failed to open " + selectedPort + "(" + e.toString() + ")";
-	            window.txtLog.append(logText + "\n");
-	            window.txtLog.setForeground(Color.RED);
+	        catch (Exception e) {
+	            log("Failed to open " + selectedPort + "(" + e.toString() + ")");
 	        }
 	    }
 	 private void setConnected(boolean b) {
 		 isConnected=b;
 	 }
-	 private boolean isConnected() {
+	 public boolean isConnected() {
 		 return isConnected;
 	 }
+	 public boolean initIOStream() throws IOException
+	    {
+	        //return value for whether opening the streams is successful or not
+	        boolean successful = false;
+
+	        try {
+	            //
+	            input = serialPort.getInputStream();
+	            output = serialPort.getOutputStream();
+	            writeData(0, 0);
+
+	            successful = true;
+	            return successful;
+	        }
+	        catch (IOException e) {
+	            log("I/O Streams failed to open. (" + e.toString() + ")");
+	            return successful;
+	        }
+	    }
+	   public void initListener()
+	    {
+	        try
+	        {
+	            serialPort.addEventListener(this);
+	            serialPort.notifyOnDataAvailable(true);
+	        }
+	        catch (TooManyListenersException e)
+	        {
+	            log("Too many listeners. (" + e.toString() + ")");
+	        }
+	    }
+	   
+	   public void disconnect()
+	    {
+	        //close the serial port
+	        try
+	        {
+	            writeData(0, 0);
+
+	            serialPort.removeEventListener();
+	            serialPort.close();
+	            input.close();
+	            output.close();
+	            setConnected(false);
+	            
+	            log("Disconnected.");
+	        }
+	        catch (Exception e)
+	        {
+	            log("Failed to close " + serialPort.getName()+ "(" + e.toString() + ")");
+	        }
+	    }
+	   @Override
+	   public void serialEvent(SerialPortEvent evt) {
+	        if (evt.getEventType() == SerialPortEvent.DATA_AVAILABLE)
+	        {
+	            try
+	            {
+	                byte singleData = (byte)input.read();
+
+	                if (singleData != NEW_LINE_ASCII)
+	                {
+	                    logData(new String(new byte[] {singleData}));
+	                }
+	                else
+	                {
+	                   	logData("\n");
+	                }
+	            }
+	            catch (Exception e)
+	            {
+	                log("Failed to read data. (" + e.toString() + ")");
+	            }
+	        }
+	    }
+	   public void writeData(int first, int second)
+	    {
+	        try
+	        {
+	            output.write(first);
+	            output.flush();
+	            //this is a delimiter for the data
+	            output.write(DASH_ASCII);
+	            output.flush();
+
+	            output.write(second);
+	            output.flush();
+	            //will be read as a byte so it is a space key
+	            output.write(SPACE_ASCII);
+	            output.flush();
+	        }
+	        catch (Exception e)
+	        {
+	            log("Failed to write data. (" + e.toString() + ")");
+	        }
+	    }
+	 
+	 public void log(String s) {
+		 System.out.println(s);
+	 }
+	 public void logData(String s) {
+		 System.out.println(s);
+	 }
+	 
 }
