@@ -4,6 +4,7 @@ import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
+import gnu.io.UnsupportedCommOperationException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,19 +81,22 @@ public class Serial implements SerialPortEventListener {
 	            commPort = selectedPortIdentifier.open("TigerControlPanel", TIMEOUT);
 	            //the CommPort object can be casted to a SerialPort object
 	            serialPort = (SerialPort)commPort;
+	            
+	            //sets baud rate (transfer rate)
+	            serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
+	                    SerialPort.PARITY_NONE);
 
-	            //for controlling GUI elements
 	            setConnected(true);
 
 	            //logging
 	            log(selectedPort + " opened successfully.");
-
-	            //CODE ON SETTING BAUD RATE ETC OMITTED
-	            //XBEE PAIR ASSUMED TO HAVE SAME SETTINGS ALREADY
-
+	            
 	            }
 	        catch (PortInUseException e) {
 	            log(selectedPort + " is in use. (" + e.toString() + ")");
+	        }
+	        catch (UnsupportedCommOperationException e) {
+	        	log("Baud rate selection failed at "+selectedPort+"("+e.toString()+")");
 	        }
 	        catch (Exception e) {
 	            log("Failed to open " + selectedPort + "(" + e.toString() + ")");
@@ -106,7 +110,6 @@ public class Serial implements SerialPortEventListener {
 	 }
 	 public boolean initIOStream() throws IOException
 	    {
-	        //return value for whether opening the streams is successful or not
 	        boolean successful = false;
 
 	        try {

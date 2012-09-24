@@ -1,3 +1,7 @@
+public class Serial 
+
+throws java.io.IOException
+
 Handles Serial connection. Searches ports, connects to arduino and writes data on serial line.
 
 void log(String s)
