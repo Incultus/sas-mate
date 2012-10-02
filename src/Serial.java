@@ -44,6 +44,17 @@ public class Serial implements SerialPortEventListener {
     
     private boolean isConnected = false; 
 	
+    public Serial() throws Exception {
+    	searchForPorts();
+    	connect(choosePort(getPorts()));
+    	if(initIOStream() == false) {
+    		log("IO Init Failed!");
+    		throw new Exception();
+    	}
+    	initListener();
+    	log("Sucessfully Connected");
+    }
+    
 	public void searchForPorts() {
 	        ports = CommPortIdentifier.getPortIdentifiers();
 
@@ -57,7 +68,7 @@ public class Serial implements SerialPortEventListener {
 	            }
 	        }
 	 }
-	
+
 	public ArrayList<String> getPorts() {
 		if(portNames.size() != 0)
 			return portNames;
@@ -68,9 +79,19 @@ public class Serial implements SerialPortEventListener {
 			return null;
 	}
 	
-	 public void connect(String portSelected)
+	public String choosePort(ArrayList<String> ports) throws Exception {
+		if(ports.size() != 1) {
+			log("Too little/too many devices connected!");
+			for(String s:ports)
+				log("Device: "+s);
+			throw new Exception();
+		}
+		return ports.get(0);
+	}
+	
+	 public void connect(String port)
 	    {
-	        String selectedPort = portSelected;
+	        String selectedPort = port;
 	        selectedPortIdentifier = (CommPortIdentifier)portMap.get(selectedPort);
 
 	        CommPort commPort = null;
@@ -169,6 +190,7 @@ public class Serial implements SerialPortEventListener {
 
 	                if (singleData != NEW_LINE_ASCII)
 	                {
+	                	processData(new String(new byte[] {singleData}));
 	                    logData(new String(new byte[] {singleData}));
 	                }
 	                else
@@ -203,12 +225,15 @@ public class Serial implements SerialPortEventListener {
 	            log("Failed to write data. (" + e.toString() + ")");
 	        }
 	    }
-	 
+	 public void processData(String s) {
+		 //to be implemented by child class
+	 }
 	 public void log(String s) {
 		 System.out.println(s);
 	 }
 	 public void logData(String s) {
 		 System.out.println(s);
 	 }
+
 	 
 }

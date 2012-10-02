@@ -12,7 +12,7 @@ public class SASMateMain {
 	
 	//TODO DO-ALL-THE-THINGS.png
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 	
 		/*
 		 * test use of SerialTest class; client classes may use writeData to write data

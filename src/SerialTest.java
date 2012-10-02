@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 public class SerialTest extends Serial {
 	
+	public SerialTest() throws Exception {
+		super();
+	}
+
 	/*
 	 * this is a test implementation of class Serial
 	 * This does not reflect the final product, but merely shows future programmars how to
@@ -17,26 +21,13 @@ public class SerialTest extends Serial {
 	int count = 0;
 	int sum = 0;
 	
-	//be sure to declare IOException
-	public SerialTest() throws IOException {
-		searchForPorts();
-		ArrayList<String> ports = getPorts();
-		if(ports.size() > 1) {
-			System.out.println("Too many devices connected!");
-			return;
-		}
-		connect(ports.get(0));
-		initIOStream();
-		initListener();
-	}
-	
 	@Override
 	public void log(String s) {
 		System.out.println("l: "+s);
 	}
 	
 	@Override
-	public void logData(String s) {
+	public void processData(String s) {
 		try {
 			
 			//there has been reports of random line break escape chars being mixed in. filter that out.
