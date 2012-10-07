@@ -23,7 +23,7 @@ public class SASMateMain {
 		
 		//this initializes all connections and initializes the listener
 		SerialTest s = new SerialTest();
-		
+		System.out.println("Sup!");
 		//this writes a sample data point to the serial line: (1,0).
 		s.writeData(1, 0);
 		
